@@ -78,6 +78,7 @@ export const PROXIES: Record<
   ((url: string) => Promise<string> | string) | undefined
 > = {
   ALL_ORIGINS: (url) => `https://api.allorigins.win/raw?url=${url}`,
+  CHAINFLARE: (url) => `https://x.xxlxx.co/?url=${url}`,
   CORS: undefined,
   WAYBACK_MACHINE: async (url) => {
     try {

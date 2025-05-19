@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import { SUPPORTED_ICON_PIXEL_RATIOS } from "utils/constants";
 import {
@@ -18,7 +18,6 @@ export type IconProps = {
   displaySize?: number;
   imgSize: number;
   singleSrc?: boolean;
-  src?: string;
 };
 
 type StyledIconProps = Pick<IconProps, "$eager" | "$moving"> & {
@@ -53,7 +52,7 @@ const StyledIcon = styled.img.attrs<StyledIconProps>(
 
 const Icon: FCWithRef<
   HTMLImageElement,
-  IconProps & Omit<React.ImgHTMLAttributes<HTMLImageElement>, "src">
+  IconProps & React.ImgHTMLAttributes<HTMLImageElement>
 > = ({
   displaySize = 0,
   imgSize = 0,
@@ -83,35 +82,47 @@ const Icon: FCWithRef<
     };
   }, [displaySize, imgSize]);
   const [failedUrls, setFailedUrls] = useState<string[]>([]);
-  const onError: React.ReactEventHandler<HTMLImageElement> = useCallback(
-    ({ target }) => {
-      const { currentSrc = "" } = (target as HTMLImageElement) || {};
-
-      try {
-        const { pathname } = new URL(currentSrc);
-
-        if (pathname && !failedUrls.includes(pathname)) {
-          setFailedUrls((currentFailedUrls) => [
-            ...currentFailedUrls,
-            pathname,
-          ]);
-        }
-      } catch {
-        // Ignore failure to log failed url
-      }
-    },
-    [failedUrls]
-  );
-  const onLoad: React.ReactEventHandler<HTMLImageElement> = useCallback(
-    () => setLoaded(true),
-    []
-  );
 
   useEffect(
     () => () => {
       if (loaded && src.startsWith("blob:")) cleanUpBufferUrl(src);
     },
     [loaded, src]
+  );
+
+  const RenderedIcon = (
+    <StyledIcon
+      ref={ref}
+      $loaded={loaded}
+      onError={({ target }) => {
+        const { currentSrc = "" } = (target as HTMLImageElement) || {};
+
+        try {
+          const { pathname } = new URL(currentSrc);
+
+          if (pathname && !failedUrls.includes(pathname)) {
+            setFailedUrls((currentFailedUrls) => [
+              ...currentFailedUrls,
+              pathname,
+            ]);
+          }
+        } catch {
+          // Ignore failure to log failed url
+        }
+      }}
+      onLoad={() => setLoaded(true)}
+      src={isDynamic ? imageSrc(imgSrc, imgSize, 1, srcExt) : src || undefined}
+      srcSet={
+        !singleSrc && isDynamic
+          ? imageSrcs(imgSrc, imgSize, srcExt, failedUrls) ||
+            (failedUrls.length === 0
+              ? ""
+              : createFallbackSrcSet(imgSrc, failedUrls))
+          : undefined
+      }
+      {...componentProps}
+      {...dimensionProps}
+    />
   );
 
   return (
@@ -143,25 +154,7 @@ const Icon: FCWithRef<
             />
           );
         })}
-      <StyledIcon
-        ref={ref}
-        $loaded={loaded}
-        onError={onError}
-        onLoad={onLoad}
-        src={
-          isDynamic ? imageSrc(imgSrc, imgSize, 1, srcExt) : src || undefined
-        }
-        srcSet={
-          !singleSrc && isDynamic
-            ? imageSrcs(imgSrc, imgSize, srcExt, failedUrls) ||
-              (failedUrls.length === 0
-                ? ""
-                : createFallbackSrcSet(imgSrc, failedUrls))
-            : undefined
-        }
-        {...componentProps}
-        {...dimensionProps}
-      />
+      {RenderedIcon}
     </picture>
   );
 };

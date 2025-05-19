@@ -49,7 +49,7 @@ test("can change background", async ({ headless, browserName, page }) => {
 test.describe("can set background", () => {
   test.beforeEach(disableWallpaper);
   test.beforeEach(async ({ page }) =>
-    loadApp({ url: "/System/Icons/48x48" })({ page })
+    loadApp({ page }, { url: "/System/Icons/48x48" })
   );
   test.beforeEach(windowsAreVisible);
   test.beforeEach(fileExplorerEntriesAreVisible);

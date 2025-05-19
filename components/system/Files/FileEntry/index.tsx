@@ -109,10 +109,11 @@ const truncateName = (
   name: string,
   fontSize: string,
   fontFamily: string,
-  maxWidth: number
+  maxWidth: number,
+  alwaysShowPossibleLines = false
 ): string => {
   const nonBreakingName = name.replace(/-/g, NON_BREAKING_HYPHEN);
-  const { lines, truncatedText } = getTextWrapData(
+  const { lines } = getTextWrapData(
     nonBreakingName,
     fontSize,
     fontFamily,
@@ -120,7 +121,10 @@ const truncateName = (
   );
 
   if (lines.length > 2) {
-    const text = name.includes(" ") ? truncatedText : lines[0];
+    const text =
+      alwaysShowPossibleLines || name.includes(" ")
+        ? lines.slice(0, 2).join("")
+        : lines[0];
 
     return `${text.slice(0, -3).trim()}...`;
   }
@@ -228,9 +232,10 @@ const FileEntry: FC<FileEntryProps> = ({
         formats.systemFont,
         sizes.fileEntry[
           listView ? "maxListTextDisplayWidth" : "maxIconTextDisplayWidth"
-        ]
+        ],
+        !isDesktop
       ),
-    [formats.systemFont, listView, name, sizes.fileEntry]
+    [formats.systemFont, isDesktop, listView, name, sizes.fileEntry]
   );
   const iconRef = useRef<HTMLImageElement | null>(null);
   const isIconCached = useRef(false);
@@ -326,21 +331,6 @@ const FileEntry: FC<FileEntryProps> = ({
         .forEach(({ icon: image }) => image && preloadImage(image))
     );
   }, [path, readdir]);
-  const onMouseOverButton = useCallback(() => {
-    if (listView && isDirectory) preloadImages();
-    createTooltip().then(setTooltip);
-  }, [createTooltip, isDirectory, listView, preloadImages]);
-  const lockWidthStyle = useMemo(
-    () => ({ maxWidth: columnWidth, minWidth: columnWidth }),
-    [columnWidth]
-  );
-  const renameFile = useCallback(
-    (origPath: string, newName?: string) => {
-      fileActions.renameFile(origPath, newName);
-      setRenaming("");
-    },
-    [fileActions, setRenaming]
-  );
 
   useEffect(() => {
     if (!isLoadingFileManager && isVisible && !isIconCached.current) {
@@ -579,7 +569,10 @@ const FileEntry: FC<FileEntryProps> = ({
       <Button
         ref={buttonRef}
         aria-label={name}
-        onMouseOverCapture={onMouseOverButton}
+        onMouseOverCapture={() => {
+          if (listView && isDirectory) preloadImages();
+          createTooltip().then(setTooltip);
+        }}
         title={tooltip}
         {...(listView && { ...LIST_VIEW_ANIMATION, as: motion.button })}
         {...useDoubleClick(doubleClickHandler, listView)}
@@ -605,7 +598,11 @@ const FileEntry: FC<FileEntryProps> = ({
             [listView]
           )}
           $renaming={renaming}
-          style={showColumn ? lockWidthStyle : undefined}
+          style={
+            showColumn
+              ? { maxWidth: columnWidth, minWidth: columnWidth }
+              : undefined
+          }
           {...(isHeading && {
             "aria-level": 1,
             role: "heading",
@@ -632,7 +629,10 @@ const FileEntry: FC<FileEntryProps> = ({
               isDesktop={isDesktop}
               name={name}
               path={path}
-              renameFile={renameFile}
+              renameFile={(origPath, newName) => {
+                fileActions.renameFile(origPath, newName);
+                setRenaming("");
+              }}
               setRenaming={setRenaming}
               view={view}
             />

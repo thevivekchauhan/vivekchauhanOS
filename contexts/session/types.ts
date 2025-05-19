@@ -43,7 +43,6 @@ export type SessionData = {
   clockSource: ClockSource;
   cursor: string | undefined;
   iconPositions: IconPositions;
-  lazySheep?: boolean;
   recentFiles: RecentFiles;
   runHistory: string[];
   sortOrders: SortOrders;

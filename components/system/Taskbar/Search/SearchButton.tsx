@@ -1,5 +1,5 @@
 import { useTheme } from "styled-components";
-import { memo, useCallback } from "react";
+import { memo } from "react";
 import StyledSearchButton from "components/system/Taskbar/Search/StyledSearchButton";
 import {
   importSearch,
@@ -28,13 +28,12 @@ const SearchButton: FC<StartButtonProps> = ({
   const {
     sizes: { taskbar },
   } = useTheme();
-  const onClick = useCallback(() => toggleSearch(), [toggleSearch]);
 
   return (
     <StyledSearchButton
       $active={searchVisible}
       $left={taskbar.button.width}
-      onClick={onClick}
+      onClick={() => toggleSearch()}
       {...DIV_BUTTON_PROPS}
       {...label(SEARCH_BUTTON_TITLE)}
       {...useTaskbarContextMenu()}

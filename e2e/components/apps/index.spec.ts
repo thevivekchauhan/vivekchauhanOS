@@ -31,7 +31,7 @@ test.describe("can open app", () => {
 
       if (url) queryParams.url = url;
 
-      await loadApp(queryParams)({ page });
+      await loadApp({ page }, queryParams);
 
       // NOTE: Some apps fully load AFTER the window has transitioned
       // eslint-disable-next-line playwright/no-wait-for-timeout
