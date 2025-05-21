@@ -1,11 +1,11 @@
 {
-  "name": "daedalos",
+  "name": "Vivek Chauhan OS",
   "version": "2.0.0",
   "description": "Desktop environment in the browser",
   "author": {
-    "name": "Dustin Brett",
-    "email": "dustinbrett@gmail.com",
-    "url": "https://dustinbrett.com"
+    "name": "Vivek Chauhan",
+    "email": "thechauhanvivek@gmail.com",
+    "url": "https://thevivekchauhan.vercel.app/"
   },
   "license": "MIT",
   "browserslist": [
