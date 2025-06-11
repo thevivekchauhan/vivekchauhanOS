@@ -1,2 +1,2 @@
-Coming Soon...Don't go anywhere..
+Coming Soon...Don't go anywhere.
 
